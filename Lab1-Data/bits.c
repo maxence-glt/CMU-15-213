@@ -190,7 +190,6 @@ int allOddBits(int x) {
 int negate(int x) {
     return ~x + 1;
 }
-//3
 /* 
  * isAsciiDigit - return 1 if 0x30 <= x <= 0x39 (ASCII codes for characters '0' to '9')
  *   Example: isAsciiDigit(0x35) = 1.
@@ -201,8 +200,9 @@ int negate(int x) {
  *   Rating: 3
  */
 int isAsciiDigit(int x) {
+    int thirty = (x>>= 4) & 0x3;
     
-    return 2;
+    return thirty;
 }
 /* 
  * conditional - same as x ? y : z 
@@ -212,7 +212,10 @@ int isAsciiDigit(int x) {
  *   Rating: 3
  */
 int conditional(int x, int y, int z) {
-  return 2;
+    // based on recitation
+    int cond = !!x;
+    int mask = (cond << 31) >> 31;
+    return (mask & y) | (~mask & z);
 }
 /* 
  * isLessOrEqual - if x <= y  then return 1, else return 0 
@@ -222,7 +225,17 @@ int conditional(int x, int y, int z) {
  *   Rating: 3
  */
 int isLessOrEqual(int x, int y) {
-  return 2;
+    int xSign = (x >> 31) & 1;
+    int ySign = (y >> 31) & 1;
+    int negativeXnonegativeY = xSign & !ySign;
+
+    int equal = !(x ^ y);
+    int sub = (x + (~y + 1));
+    int diffSigns = (sub >> 31) & 1;
+    int sameSign = !(xSign ^ ySign);
+    int diffNonPos = sameSign & (~(!!sub) | diffSigns);
+
+    return negativeXnonegativeY | equal | diffNonPos;
 }
 //4
 /* 
