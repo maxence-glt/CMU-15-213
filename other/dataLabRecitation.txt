@@ -1,0 +1,57 @@
+https://www.cs.cmu.edu/afs/cs/academic/class/15213-f17/www/activities/213_recitation3.pdf
+
+Activity 1: Bit-level and Logical
+1.   x    y    ~(x & y)    (~x) | (~y)
+
+   0xF  0x1    0xFE        0xFE
+   0x5  0x7    0xFA        0xFA
+   0x3  0xC    0xFF        0xFF
+
+1. (0x3 && 0xC) == (0x3 & 0xC)
+
+   This will evaluate to false since (0x && 0x3) == true and 
+   (0x3 & 0xC) == 0x0 (same as 0b1100 & 0b0011 which is 0)
+
+2.   X    !X    !!X    ~X    ~~X
+
+    -1     0      1     0     -1
+     0     1      0    -1      0
+     1     0      1    -2      1
+     2     0      1    -3      2
+
+Activity 2: Shifts, Negation and Conditional
+1. -2 >> 1 == -1 since it's an arithmetic shift
+
+2. -2 == 1110 (-8 + 4 + 2 == -2)
+   -2 >> 1 == -1
+
+3.  x   x in binary   -x in binary
+    1   0001          1110
+    2   0010          1110
+    7   0111          1001
+    -8  1000          Impossible
+
+4.  int conditional(int cond, int t, int f) {
+      /* Compute a mask that equals 0x00000000 or
+      0xFFFFFFFF depending on the value of cond */
+
+      int mask = (cond << 31) >> 31;
+
+      /* Use the mask to toggle between returning t or returning f */
+
+      return (mask & t) | (~mask & f)
+    }
+
+Activity 3: Floating-point
+TODO
+
+Activity 4: Divide and Conquer
+1.  int bitCount2bit(int x) {
+      int bit1 = x & 2;
+      int bit2 = x & 1;
+      return bit1 + bit2;
+    }
+
+2.  int bitCount4bit(int x) {
+      int mask = 
+}
