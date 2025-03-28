@@ -480,22 +480,26 @@ Disassembly of section .text:
   401061:	c3                   	retq   
 
 0000000000401062 <phase_5>:
-  401062:	53                   	push   %rbx
-  401063:	48 83 ec 20          	sub    $0x20,%rsp
-  401067:	48 89 fb             	mov    %rdi,%rbx
-  40106a:	64 48 8b 04 25 28 00 	mov    %fs:0x28,%rax
-  401071:	00 00 
-  401073:	48 89 44 24 18       	mov    %rax,0x18(%rsp)
-  401078:	31 c0                	xor    %eax,%eax
-  40107a:	e8 9c 02 00 00       	callq  40131b <string_length>
-  40107f:	83 f8 06             	cmp    $0x6,%eax
-  401082:	74 4e                	je     4010d2 <phase_5+0x70>
-  401084:	e8 b1 03 00 00       	callq  40143a <explode_bomb>
+  401062:	53                   	push   %rbx	    // push rbx 
+  // What that did was set the address of rbx to rsp
+  401063:	48 83 ec 20          	sub    $0x20,%rsp   // rsp -= 4 bytes
+  401067:	48 89 fb             	mov    %rdi,%rbx    // move input string to rbx
+  40106a:	64 48 8b 04 25 28 00 	mov    %fs:0x28,%rax  // rax = stack guard
+  401073:	48 89 44 24 18       	mov    %rax,0x18(%rsp)	// move rax to rsp + 24
+  401078:	31 c0                	xor    %eax,%eax	// eax ^ eax (clear eax)
+  40107a:	e8 9c 02 00 00       	callq  40131b <string_length> // call string_length
+  // If rdi is empty, return 0
+  // You want it to return 6 (input sring must have length of 6)
+  40107f:	83 f8 06             	cmp    $0x6,%eax // eax - 6
+  401082:	74 4e                	je     4010d2 <phase_5+0x70> // jmp to A
+  401084:	e8 b1 03 00 00       	callq  40143a <explode_bomb> // explode
   401089:	eb 47                	jmp    4010d2 <phase_5+0x70>
-  40108b:	0f b6 0c 03          	movzbl (%rbx,%rax,1),%ecx
-  40108f:	88 0c 24             	mov    %cl,(%rsp)
-  401092:	48 8b 14 24          	mov    (%rsp),%rdx
-  401096:	83 e2 0f             	and    $0xf,%edx
+  // B
+  40108b:	0f b6 0c 03          	movzbl (%rbx,%rax,1),%ecx    // zero extend mov
+  // ecx = rbx (only moving one of rbx's bytes)
+  40108f:	88 0c 24             	mov    %cl,(%rsp) // cl is ecx's lower 8 byte
+  401092:	48 8b 14 24          	mov    (%rsp),%rdx // move cl to rdx
+  401096:	83 e2 0f             	and    $0xf,%edx // $edx & 0xf (1111)
   401099:	0f b6 92 b0 24 40 00 	movzbl 0x4024b0(%rdx),%edx
   4010a0:	88 54 04 10          	mov    %dl,0x10(%rsp,%rax,1)
   4010a4:	48 83 c0 01          	add    $0x1,%rax
@@ -510,11 +514,11 @@ Disassembly of section .text:
   4010c6:	e8 6f 03 00 00       	callq  40143a <explode_bomb>
   4010cb:	0f 1f 44 00 00       	nopl   0x0(%rax,%rax,1)
   4010d0:	eb 07                	jmp    4010d9 <phase_5+0x77>
-  4010d2:	b8 00 00 00 00       	mov    $0x0,%eax
-  4010d7:	eb b2                	jmp    40108b <phase_5+0x29>
+  // A
+  4010d2:	b8 00 00 00 00       	mov    $0x0,%eax    // clear eax
+  4010d7:	eb b2                	jmp    40108b <phase_5+0x29> // jmp to B
   4010d9:	48 8b 44 24 18       	mov    0x18(%rsp),%rax
   4010de:	64 48 33 04 25 28 00 	xor    %fs:0x28,%rax
-  4010e5:	00 00 
   4010e7:	74 05                	je     4010ee <phase_5+0x8c>
   4010e9:	e8 42 fa ff ff       	callq  400b30 <__stack_chk_fail@plt>
   4010ee:	48 83 c4 20          	add    $0x20,%rsp
@@ -699,17 +703,19 @@ Disassembly of section .text:
   401316:	e8 05 f9 ff ff       	callq  400c20 <exit@plt>
 
 000000000040131b <string_length>:
-  40131b:	80 3f 00             	cmpb   $0x0,(%rdi)
-  40131e:	74 12                	je     401332 <string_length+0x17>
-  401320:	48 89 fa             	mov    %rdi,%rdx
-  401323:	48 83 c2 01          	add    $0x1,%rdx
-  401327:	89 d0                	mov    %edx,%eax
-  401329:	29 f8                	sub    %edi,%eax
-  40132b:	80 3a 00             	cmpb   $0x0,(%rdx)
-  40132e:	75 f3                	jne    401323 <string_length+0x8>
+  40131b:	80 3f 00             	cmpb   $0x0,(%rdi) // check if rdi is empty
+  40131e:	74 12                	je     401332 <string_length+0x17> // jmp to A
+  401320:	48 89 fa             	mov    %rdi,%rdx  // move input to rdx
+  // B
+  401323:	48 83 c2 01          	add    $0x1,%rdx  // add 1 to rdx
+  401327:	89 d0                	mov    %edx,%eax  // move edx to eax
+  401329:	29 f8                	sub    %edi,%eax  // eax - edi (eax = 1)
+  40132b:	80 3a 00             	cmpb   $0x0,(%rdx)  // check if rdx is 0
+  40132e:	75 f3                	jne    401323 <string_length+0x8> // jmp to B
   401330:	f3 c3                	repz retq 
-  401332:	b8 00 00 00 00       	mov    $0x0,%eax
-  401337:	c3                   	retq   
+  // A
+  401332:	b8 00 00 00 00       	mov    $0x0,%eax  // return 0
+  401337:	c3                   	retq
 
 0000000000401338 <strings_not_equal>:
   401338:	41 54                	push   %r12
